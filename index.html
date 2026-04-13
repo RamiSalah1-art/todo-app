@@ -329,24 +329,31 @@ let jokePunchline = document.getElementById("jokePunchline");
 let fetchJokeBtn = document.getElementById("fetchJokeBtn");
 
 // دالة جلب النكتة
+// مصفوفة نكات عربية
+const arabicJokes = [
+    { setup: "لماذا الثلاجة غبية؟", punchline: "لأنها تحفظ كل شيء ولا تفهم شيئاً." },
+    { setup: "لماذا السمك لا يستخدم الهاتف؟", punchline: "لأنه يخاف من الشبكة!" },
+    { setup: "ما هو الحيوان الذي لا ينام؟", punchline: "المنبه." },
+    { setup: "لماذا الحمار الوحشي لا يركب القطار؟", punchline: "لأنه مخطط له." },
+    { setup: "كيف تعرف أن الفيل كان في الثلاجة؟", punchline: "من آثار أقدامه على الزبدة." },
+    { setup: "لماذا الخبز سعيد؟", punchline: "لأنه محمص." }
+];
+
 const fetchJoke = () => {
+    fetchJokeBtn.addEventListener("click", fetchJoke);
     jokeSetup.textContent = "جاري تحميل النكتة...";
     jokePunchline.textContent = "";
     
-    fetch("https://official-joke-api.appspot.com/random_joke")
-        .then(response => response.json())
-        .then(data => {
-            jokeSetup.textContent = data.setup;
-            jokePunchline.textContent = data.punchline;
-        })
-        .catch(error => {
-            jokeSetup.textContent = "عذراً، حدث خطأ";
-            jokePunchline.textContent = "تأكد من اتصالك بالإنترنت";
-        });
+    // اختيار نكتة عشوائية من المصفوفة
+    let randomIndex = Math.floor(Math.random() * arabicJokes.length);
+    let randomJoke = arabicJokes[randomIndex];
+    
+    // تأخير بسيط لمحاكاة التحميل
+    setTimeout(() => {
+        jokeSetup.textContent = randomJoke.setup;
+        jokePunchline.textContent = randomJoke.punchline;
+    }, 500);
 };
-
-// ربط الدالة بالزر
-fetchJokeBtn.addEventListener("click", fetchJoke);
 
     </script>
 </body>
