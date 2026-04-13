@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>قائمة مهامي</title>
+    <style>
+        /* سنضيف التنسيقات هنا لاحقاً */
+    </style>
+</head>
+<body>
+    <h1>📋 قائمة مهامي</h1>
+    
+    <div class="add-task-section">
+        <input id="taskInput" type="text" placeholder="اكتب مهمة جديدة..." />
+        <button id="addTaskBtn">➕ إضافة</button>
+    </div>
+
+    <div class="stats-section">
+        <p>📊 المهام المتبقية: <span id="pendingCount">0</span></p>
+    </div>
+
+    <div id="tasksContainer" class="tasks-container">
+        <!-- المهام ستظهر هنا ديناميكياً -->
+    </div>
+
+    <div class="control-section">
+        <button id="deleteCompletedBtn">🗑️ حذف المكتملة</button>
+        <button id="clearAllBtn">⚠️ حذف الكل</button>
+    </div>
+    
+    <script>
+        // الوصول للعناصر
+        let taskInput = document.getElementById("taskInput");
+        let addBtn = document.getElementById("addTaskBtn");
+        let tasksDiv = document.getElementById("tasksContainer");
+
+        // دالة إضافة مهمة
+        function addTask() {
+            let taskText = taskInput.value;
+            if (taskText === "") {
+                return;
+            }
+            
+            let taskDiv = document.createElement("div");
+            
+            let taskSpan = document.createElement("span");
+            taskSpan.textContent = taskText;
+            
+            let completeBtn = document.createElement("button");
+            completeBtn.textContent = "✅";
+            completeBtn.onclick = function() {
+                taskSpan.style.textDecoration = "line-through";
+                updatePendingCount();
+                saveTasks();
+            };
+            
+            let deleteBtn = document.createElement("button");
+            deleteBtn.textContent = "❌";
+            deleteBtn.onclick = function() {
+                taskDiv.remove();
+                updatePendingCount();
+                saveTasks();
+            };
+            
+            taskDiv.appendChild(taskSpan);
+            taskDiv.appendChild(completeBtn);
+            taskDiv.appendChild(deleteBtn);
+            
+            tasksDiv.appendChild(taskDiv);
+            
+            taskInput.value = "";
+            updatePendingCount();
+            saveTasks();
+        }
+
+        // ربط الدالة بالزر
+        addBtn.addEventListener("click", addTask);
+
+        // الوصول لعداد المهام
+        let pendingSpan = document.getElementById("pendingCount");
+
+        // دالة تحديث العداد
+        function updatePendingCount() {
+            let allTasks = document.querySelectorAll("#tasksContainer div");
+            let count = 0;
+            
+            for (let i = 0; i < allTasks.length; i = i + 1) {
+                let taskDiv = allTasks[i];
+                let span = taskDiv.querySelector("span");
+                
+                if (span.style.textDecoration !== "line-through") {
+                    count = count + 1;
+                }
+            }
+            
+            pendingSpan.textContent = count;
+        }
+
+        // زر حذف المكتملة
+        let deleteCompletedBtn = document.getElementById("deleteCompletedBtn");
+
+        deleteCompletedBtn.onclick = function() {
+            let allTasks = document.querySelectorAll("#tasksContainer div");
+            
+            for (let i = 0; i < allTasks.length; i = i + 1) {
+                let taskDiv = allTasks[i];
+                let span = taskDiv.querySelector("span");
+                
+                if (span.style.textDecoration === "line-through") {
+                    taskDiv.remove();
+                }
+            }
+            
+            updatePendingCount();
+            saveTasks();
+        };
+
+        // زر حذف الكل
+        let clearAllBtn = document.getElementById("clearAllBtn");
+
+        clearAllBtn.onclick = function() {
+            let confirmDelete = confirm("هل أنت متأكد من حذف جميع المهام؟");
+            
+            if (confirmDelete === true) {
+                tasksDiv.innerHTML = "";
+                updatePendingCount();
+                saveTasks();
+            }
+        };
+
+        // دالة حفظ المهام في localStorage
+        function saveTasks() {
+            let allTasks = [];
+            let taskElements = document.querySelectorAll("#tasksContainer div");
+            
+            for (let i = 0; i < taskElements.length; i = i + 1) {
+                let taskDiv = taskElements[i];
+                let span = taskDiv.querySelector("span");
+                
+                let taskData = {
+                    text: span.textContent,
+                    completed: span.style.textDecoration === "line-through"
+                };
+                
+                allTasks.push(taskData);
+            }
+            
+            localStorage.setItem("myTasks", JSON.stringify(allTasks));
+        }
+
+        // دالة تحميل المهام من localStorage
+        function loadTasks() {
+            let saved = localStorage.getItem("myTasks");
+            
+            if (saved) {
+                let tasksArray = JSON.parse(saved);
+                
+                tasksDiv.innerHTML = "";
+                
+                for (let i = 0; i < tasksArray.length; i = i + 1) {
+                    let taskData = tasksArray[i];
+                    
+                    let taskDiv = document.createElement("div");
+                    
+                    let taskSpan = document.createElement("span");
+                    taskSpan.textContent = taskData.text;
+                    if (taskData.completed) {
+                        taskSpan.style.textDecoration = "line-through";
+                    }
+                    
+                    let completeBtn = document.createElement("button");
+                    completeBtn.textContent = "✅";
+                    completeBtn.onclick = function() {
+                        taskSpan.style.textDecoration = "line-through";
+                        updatePendingCount();
+                        saveTasks();
+                    };
+                    
+                    let deleteBtn = document.createElement("button");
+                    deleteBtn.textContent = "❌";
+                    deleteBtn.onclick = function() {
+                        taskDiv.remove();
+                        updatePendingCount();
+                        saveTasks();
+                    };
+                    
+                    taskDiv.appendChild(taskSpan);
+                    taskDiv.appendChild(completeBtn);
+                    taskDiv.appendChild(deleteBtn);
+                    
+                    tasksDiv.appendChild(taskDiv);
+                }
+                
+                updatePendingCount();
+            }
+        }
+
+        // تحميل المهام عند فتح الصفحة
+        loadTasks();
+
+    </script>
+</body>
+</html>
