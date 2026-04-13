@@ -339,22 +339,21 @@ const arabicJokes = [
     { setup: "لماذا الخبز سعيد؟", punchline: "لأنه محمص." }
 ];
 
-const fetchJoke = () => {
+const fetchJoke = async () => {
     fetchJokeBtn.addEventListener("click", fetchJoke);
     jokeSetup.textContent = "جاري تحميل النكتة...";
     jokePunchline.textContent = "";
     
-    // اختيار نكتة عشوائية من المصفوفة
-    let randomIndex = Math.floor(Math.random() * arabicJokes.length);
-    let randomJoke = arabicJokes[randomIndex];
-    
-    // تأخير بسيط لمحاكاة التحميل
-    setTimeout(() => {
-        jokeSetup.textContent = randomJoke.setup;
-        jokePunchline.textContent = randomJoke.punchline;
-    }, 500);
+    try {
+        let response = await fetch("https://official-joke-api.appspot.com/random_joke");
+        let data = await response.json();
+        jokeSetup.textContent = data.setup;
+        jokePunchline.textContent = data.punchline;
+    } catch (error) {
+        jokeSetup.textContent = "عذراً، حدث خطأ";
+        jokePunchline.textContent = "تأكد من اتصالك بالإنترنت";
+    }
 };
-
     </script>
 </body>
 </html>
