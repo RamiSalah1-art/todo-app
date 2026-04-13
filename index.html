@@ -139,7 +139,15 @@ h1 {
         <button id="deleteCompletedBtn">🗑️ حذف المكتملة</button>
         <button id="clearAllBtn">⚠️ حذف الكل</button>
     </div>
-    
+
+    <br>
+<div style="margin-top: 20px; padding: 15px; background-color: #fff3cd; border-radius: 8px;">
+    <h3>😂 نكتة اليوم</h3>
+    <p id="jokeSetup" style="font-weight: bold;">اضغط على الزر للحصول على نكتة</p>
+    <p id="jokePunchline" style="color: #555;"></p>
+    <button id="fetchJokeBtn">🔄 أحضر نكتة</button>
+</div>
+
     <script>
         // الوصول للعناصر
         let taskInput = document.getElementById("taskInput");
@@ -147,44 +155,46 @@ h1 {
         let tasksDiv = document.getElementById("tasksContainer");
 
         // دالة إضافة مهمة
-        function addTask() {
-            let taskText = taskInput.value;
-            if (taskText === "") {
-                return;
-            }
-            
-            let taskDiv = document.createElement("div");
-            
-            let taskSpan = document.createElement("span");
-            taskSpan.textContent = taskText;
-            
-            let completeBtn = document.createElement("button");
-            completeBtn.textContent = "✅";
-            completeBtn.onclick = function() {
-                taskSpan.style.textDecoration = "line-through";
-                updatePendingCount();
-                saveTasks();
-            };
-            
-            let deleteBtn = document.createElement("button");
-            deleteBtn.textContent = "❌";
-            deleteBtn.onclick = function() {
-                taskDiv.remove();
-                updatePendingCount();
-                saveTasks();
-            };
-            
-            taskDiv.appendChild(taskSpan);
-            taskDiv.appendChild(completeBtn);
-            taskDiv.appendChild(deleteBtn);
-            
-            tasksDiv.appendChild(taskDiv);
-            
-            taskInput.value = "";
-            updatePendingCount();
-            saveTasks();
-        }
-
+        const addTask = () => {
+    let taskText = taskInput.value;
+    if (taskText === "") {
+        return;
+    }
+    
+    let taskDiv = document.createElement("div");
+    
+    let taskSpan = document.createElement("span");
+    taskSpan.textContent = taskText;
+    
+    let completeBtn = document.createElement("button");
+    completeBtn.textContent = "✅";
+    completeBtn.onclick = () => {
+        taskSpan.style.textDecoration = "line-through";
+        updatePendingCount();
+        saveTasks();
+    };
+    
+    let deleteBtn = document.createElement("button");
+    deleteBtn.textContent = "❌";
+    deleteBtn.onclick = () => {
+        taskDiv.remove();
+        updatePendingCount();
+        saveTasks();
+    };
+    
+    taskDiv.appendChild(taskSpan);
+    taskDiv.appendChild(completeBtn);
+    taskDiv.appendChild(deleteBtn);
+    
+    tasksDiv.appendChild(taskDiv);
+    
+    taskInput.value = "";
+    
+    console.log(`تمت إضافة مهمة جديدة: "${taskText}"`);
+    
+    updatePendingCount();
+    saveTasks();
+};
         // ربط الدالة بالزر
         addBtn.addEventListener("click", addTask);
 
@@ -192,7 +202,7 @@ h1 {
         let pendingSpan = document.getElementById("pendingCount");
 
         // دالة تحديث العداد
-        function updatePendingCount() {
+        const updatePendingCount = () => {
             let allTasks = document.querySelectorAll("#tasksContainer div");
             let count = 0;
             
@@ -241,74 +251,102 @@ h1 {
         };
 
         // دالة حفظ المهام في localStorage
-        function saveTasks() {
-            let allTasks = [];
-            let taskElements = document.querySelectorAll("#tasksContainer div");
-            
-            for (let i = 0; i < taskElements.length; i = i + 1) {
-                let taskDiv = taskElements[i];
-                let span = taskDiv.querySelector("span");
-                
-                let taskData = {
-                    text: span.textContent,
-                    completed: span.style.textDecoration === "line-through"
-                };
-                
-                allTasks.push(taskData);
-            }
-            
-            localStorage.setItem("myTasks", JSON.stringify(allTasks));
-        }
+        const saveTasks = () => {
+    let allTasks = [];
+    let taskElements = document.querySelectorAll("#tasksContainer div");
+    
+    for (let i = 0; i < taskElements.length; i = i + 1) {
+        let taskDiv = taskElements[i];
+        let span = taskDiv.querySelector("span");
+        
+        let defaultTask = { priority: "عادي", category: "عام" };
+        
+        let taskData = {
+            text: span.textContent,
+            completed: span.style.textDecoration === "line-through",
+            ...defaultTask
+        };
+        
+        allTasks.push(taskData);
+    }
+    
+    localStorage.setItem("myTasks", JSON.stringify(allTasks));
+};
 
         // دالة تحميل المهام من localStorage
-        function loadTasks() {
-            let saved = localStorage.getItem("myTasks");
+const loadTasks = () => {
+    let saved = localStorage.getItem("myTasks");
+    
+    if (saved) {
+        let tasksArray = JSON.parse(saved);
+        
+        tasksDiv.innerHTML = "";
+        
+        for (let i = 0; i < tasksArray.length; i = i + 1) {
+            let { text, completed } = tasksArray[i];
             
-            if (saved) {
-                let tasksArray = JSON.parse(saved);
-                
-                tasksDiv.innerHTML = "";
-                
-                for (let i = 0; i < tasksArray.length; i = i + 1) {
-                    let taskData = tasksArray[i];
-                    
-                    let taskDiv = document.createElement("div");
-                    
-                    let taskSpan = document.createElement("span");
-                    taskSpan.textContent = taskData.text;
-                    if (taskData.completed) {
-                        taskSpan.style.textDecoration = "line-through";
-                    }
-                    
-                    let completeBtn = document.createElement("button");
-                    completeBtn.textContent = "✅";
-                    completeBtn.onclick = function() {
-                        taskSpan.style.textDecoration = "line-through";
-                        updatePendingCount();
-                        saveTasks();
-                    };
-                    
-                    let deleteBtn = document.createElement("button");
-                    deleteBtn.textContent = "❌";
-                    deleteBtn.onclick = function() {
-                        taskDiv.remove();
-                        updatePendingCount();
-                        saveTasks();
-                    };
-                    
-                    taskDiv.appendChild(taskSpan);
-                    taskDiv.appendChild(completeBtn);
-                    taskDiv.appendChild(deleteBtn);
-                    
-                    tasksDiv.appendChild(taskDiv);
-                }
-                
-                updatePendingCount();
+            let taskDiv = document.createElement("div");
+            
+            let taskSpan = document.createElement("span");
+            taskSpan.textContent = text;
+            if (completed) {
+                taskSpan.style.textDecoration = "line-through";
             }
+            
+            let completeBtn = document.createElement("button");
+            completeBtn.textContent = "✅";
+            completeBtn.onclick = function() {
+                taskSpan.style.textDecoration = "line-through";
+                updatePendingCount();
+                saveTasks();
+            };
+            
+            let deleteBtn = document.createElement("button");
+            deleteBtn.textContent = "❌";
+            deleteBtn.onclick = function() {
+                taskDiv.remove();
+                updatePendingCount();
+                saveTasks();
+            };
+            
+            taskDiv.appendChild(taskSpan);
+            taskDiv.appendChild(completeBtn);
+            taskDiv.appendChild(deleteBtn);
+            
+            tasksDiv.appendChild(taskDiv);
         }
+        
+        updatePendingCount();
+    }
+};
 
         // تحميل المهام عند فتح الصفحة
         loadTasks();
+
+        // الوصول للعناصر الجديدة
+let jokeSetup = document.getElementById("jokeSetup");
+let jokePunchline = document.getElementById("jokePunchline");
+let fetchJokeBtn = document.getElementById("fetchJokeBtn");
+
+// دالة جلب النكتة
+const fetchJoke = () => {
+    jokeSetup.textContent = "جاري تحميل النكتة...";
+    jokePunchline.textContent = "";
+    
+    fetch("https://official-joke-api.appspot.com/random_joke")
+        .then(response => response.json())
+        .then(data => {
+            jokeSetup.textContent = data.setup;
+            jokePunchline.textContent = data.punchline;
+        })
+        .catch(error => {
+            jokeSetup.textContent = "عذراً، حدث خطأ";
+            jokePunchline.textContent = "تأكد من اتصالك بالإنترنت";
+        });
+};
+
+// ربط الدالة بالزر
+fetchJokeBtn.addEventListener("click", fetchJoke);
 
     </script>
 </body>
